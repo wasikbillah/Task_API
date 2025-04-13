@@ -40,9 +40,13 @@ namespace Task_API.Services.Implementations
             return await _context.RolePermissions.Include(u => u.Role).Include(x=> x.Permission).ToListAsync();
         }
 
-        public async Task<RolePermission> GetById(int id)
+        public async Task<List<RolePermission>> GetById(int roleId)
         {
-            return await _context.RolePermissions.FirstOrDefaultAsync(x=> x.Id == id);
+            return await _context.RolePermissions
+                .Where(x => x.RoleId == roleId)
+                .Include(x => x.Role)      
+                .Include(x => x.Permission) 
+                .ToListAsync();
         }
 
         public async Task<RolePermission> Update(RolePermission obj)

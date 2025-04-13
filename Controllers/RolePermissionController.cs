@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Task_API.Models;
 using Task_API.Services.Interfaces;
 
 namespace Task_API.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class RolePermissionController : ControllerBase
@@ -31,8 +33,16 @@ namespace Task_API.Controllers
         [HttpGet("Get/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var entity = await _services.GetById(id);
-            return Ok(entity);
+            var permissions = await _services.GetById(id);
+
+            var result = permissions.Select(p => new
+            {
+                p.Id,
+                RoleName = p.Role?.Name ?? "N/A",
+                PermissionName = p.Permission?.Name ?? "N/A"
+            });
+
+            return Ok(result);
         }
 
         [HttpPost("Add")]

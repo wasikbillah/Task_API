@@ -42,15 +42,27 @@ namespace Task_API.Services.Implementations
 
         public async Task<User> GetById(int id)
         {
-            return await _context.Users.FirstOrDefaultAsync(x=> x.Id == id);
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
+
 
         public async Task<User> Update(User obj)
         {
             var exist = await _context.Users.FindAsync(obj.Id);
-            _context.Entry(exist).CurrentValues.SetValues(obj);
+            if (exist == null)
+            {
+                return null;
+            }
+          
+
+            exist.Name = obj.Name;
+            exist.RoleId = obj.RoleId;
+
             await _context.SaveChangesAsync();
-            return obj;
+            return exist;
         }
+
     }
 }
