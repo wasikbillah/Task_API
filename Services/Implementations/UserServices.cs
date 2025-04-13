@@ -60,6 +60,15 @@ namespace Task_API.Services.Implementations
             exist.Name = obj.Name;
             exist.RoleId = obj.RoleId;
 
+            if (obj.Password == "")
+            {
+                exist.Password = exist.Password;
+            }
+            else
+            {
+                exist.Password = obj.Password;
+            }
+
             await _context.SaveChangesAsync();
             return exist;
         }
