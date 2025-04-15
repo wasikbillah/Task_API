@@ -6,7 +6,7 @@ using Task_API.Services.Interfaces;
 
 namespace Task_API.Controllers
 {
-    [Authorize(Roles = "Admin,Project Manager")]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class TaskController : ControllerBase

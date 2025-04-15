@@ -96,5 +96,15 @@ namespace Task_API.Services.Implementations
 
             return !hasConflict;
         }
+
+        public async Task<List<Models.Task>> GetByUserId(int userId)
+        {
+            return await _context.Tasks
+                .Include(u => u.AssignedUser)
+                .Include(s => s.Status)
+                .Where(t => t.AssignedUserId == userId)
+                .ToListAsync();
+        }
+
     }
 }

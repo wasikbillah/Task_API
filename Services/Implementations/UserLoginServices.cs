@@ -43,6 +43,7 @@ namespace Task_API.Services.Implementations
                 {
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Role, user.Role.Name),
+                new Claim("UserId", user.Id.ToString())
             }),
                 Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:ExpiryInMinutes"])),
                 Issuer = _configuration["JwtSettings:Issuer"],

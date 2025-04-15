@@ -10,6 +10,7 @@ namespace Task_API.Services.Interfaces
         Task<Models.Task> Update(Models.Task obj);
         Task<bool> Delete(int id);
         Task<bool> IsAvailable(int userId, DateTime startDate, DateTime endDate, int? taskId = null);
+        Task<List<Models.Task>> GetByUserId(int userId);
 
     }
 }
