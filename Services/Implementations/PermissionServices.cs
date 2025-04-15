@@ -49,9 +49,15 @@ namespace Task_API.Services.Implementations
         public async Task<Permission> Update(Permission obj)
         {
             var exist = await _context.Permissions.FindAsync(obj.Id);
-            _context.Entry(exist).CurrentValues.SetValues(obj);
+            if (exist == null)
+            {
+                return null;
+            }
+
+            exist.Name = obj.Name;
+            
             await _context.SaveChangesAsync();
-            return obj;
+            return exist;
         }
     }
 }

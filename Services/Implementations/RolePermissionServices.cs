@@ -52,9 +52,16 @@ namespace Task_API.Services.Implementations
         public async Task<RolePermission> Update(RolePermission obj)
         {
             var exist = await _context.RolePermissions.FindAsync(obj.Id);
-            _context.Entry(exist).CurrentValues.SetValues(obj);
+            if (exist == null)
+            {
+                return null;
+            }
+
+            exist.PermissionId = obj.PermissionId;
+            exist.RoleId = obj.RoleId;
+
             await _context.SaveChangesAsync();
-            return obj;
+            return exist;
         }
     }
 }

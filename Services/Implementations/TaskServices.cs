@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using System.Security;
 using Task_API.Data;
 using Task_API.Models;
@@ -13,12 +14,23 @@ namespace Task_API.Services.Implementations
         {
             _context = context;
         }
-        public async Task<Models.Task> Add(Models.Task obj)
+        public async Task<Models.Task?> Add(Models.Task obj)
         {
-            await _context.Tasks.AddAsync(obj);
-            await _context.SaveChangesAsync();       
-            return obj;
+            if (obj == null)
+                return null;
+
+            bool isAvailable = await IsAvailable(obj.AssignedUserId, obj.StartDate, obj.Deadline);
+
+            if (isAvailable)
+            {
+                await _context.Tasks.AddAsync(obj);
+                await _context.SaveChangesAsync();
+                return obj;
+            }
+
+            return null;
         }
+
 
 
         public async Task<bool> Delete(int id)
@@ -37,6 +49,7 @@ namespace Task_API.Services.Implementations
 
         public async Task<List<Models.Task>> GetAll()
         {
+
            return  await _context.Tasks.Include(u => u.AssignedUser).Include(x=> x.Status).ToListAsync();
         }
 
@@ -48,9 +61,40 @@ namespace Task_API.Services.Implementations
         public async Task<Models.Task> Update(Models.Task obj)
         {
             var exist = await _context.Tasks.FindAsync(obj.Id);
-            _context.Entry(exist).CurrentValues.SetValues(obj);
-            await _context.SaveChangesAsync();
-            return obj;
+            if (exist == null)
+            {
+                return null;
+            }
+
+            bool isAvailable = await IsAvailable(obj.AssignedUserId, obj.StartDate, obj.Deadline , obj.Id);
+
+            if (isAvailable)
+            {
+                exist.Title = obj.Title;
+                exist.Description = obj.Description;
+                exist.StartDate = obj.StartDate;
+                exist.Deadline = obj.Deadline;
+                exist.StatusId = obj.StatusId;
+                exist.AssignedUserId = obj.AssignedUserId;
+
+                await _context.SaveChangesAsync();
+                return exist;
+            }
+
+            return null;
+        }
+
+        public async Task<bool> IsAvailable(int userId, DateTime startDate, DateTime endDate, int? taskId = null)
+        {
+            var hasConflict = await _context.Tasks
+                .AnyAsync(t =>
+                    t.AssignedUserId == userId &&
+                    t.StatusId == 2 &&
+                    (taskId == null || t.Id != taskId) && 
+                    !(endDate < t.StartDate || startDate > t.Deadline)
+                );
+
+            return !hasConflict;
         }
     }
 }
